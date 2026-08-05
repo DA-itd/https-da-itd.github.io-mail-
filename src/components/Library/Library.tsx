@@ -1,23 +1,16 @@
 import React, { useState } from 'react';
 import { Asset } from '../../types';
-import { useLocalStorage } from '../../store';
+import { useLibraryStore } from '../../store/useEditorStore';
 import { Plus, Trash2, Image as ImageIcon, Copy } from 'lucide-react';
 
-const defaultAssets: Asset[] = [
-  { id: '1', name: 'Escudo ITD', type: 'logo', url: 'https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png' },
-  { id: '2', name: 'Logo TecNM', type: 'logo', url: 'https://raw.githubusercontent.com/DA-itd/A/main/tecnm1.jpg' },
-  { id: '3', name: 'Pola', type: 'logo', url: 'https://raw.githubusercontent.com/DA-itd/web/main/pola.png' },
-  { id: '4', name: 'Fondo TecNM', type: 'background', url: 'https://raw.githubusercontent.com/DA-itd/web/main/TecNM.jpg' },
-];
-
 export default function Library() {
-  const [assets, setAssets] = useLocalStorage<Asset[]>('itd_email_v23_assets', defaultAssets);
+  const { assets, addAsset, removeAsset } = useLibraryStore();
   const [filter, setFilter] = useState<'all' | 'logo' | 'banner' | 'background' | 'photo'>('all');
   const [newAssetUrl, setNewAssetUrl] = useState('');
   const [newAssetName, setNewAssetName] = useState('');
   const [newAssetType, setNewAssetType] = useState<'logo' | 'banner' | 'background' | 'photo'>('logo');
 
-  const addAsset = (e: React.FormEvent) => {
+  const handleAddAsset = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newAssetUrl || !newAssetName) return;
     
@@ -28,13 +21,9 @@ export default function Library() {
       type: newAssetType,
     };
     
-    setAssets([...assets, newAsset]);
+    addAsset(newAsset);
     setNewAssetUrl('');
     setNewAssetName('');
-  };
-
-  const removeAsset = (id: string) => {
-    setAssets(assets.filter(a => a.id !== id));
   };
 
   const copyUrl = (url: string) => {
@@ -56,7 +45,7 @@ export default function Library() {
 
         <div className="bg-white border border-slate-200 rounded-lg shadow-sm p-6 mb-8">
           <h3 className="font-bold text-slate-700 mb-4">Añadir Nuevo Recurso</h3>
-          <form onSubmit={addAsset} className="flex flex-col md:flex-row gap-4 items-end">
+          <form onSubmit={handleAddAsset} className="flex flex-col md:flex-row gap-4 items-end">
             <div className="flex-1 w-full">
               <label className="block text-xs font-bold text-slate-500 mb-1">Nombre</label>
               <input type="text" required value={newAssetName} onChange={e => setNewAssetName(e.target.value)} className="w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Ej. Banner Convocatoria" />

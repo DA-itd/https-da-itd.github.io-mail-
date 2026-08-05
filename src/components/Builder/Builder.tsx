@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { Block, BlockType, InstitutionSettings } from '../../types';
+import { Block, BlockType } from '../../types';
 import BlockEditor from './BlockEditor';
 import Preview from './Preview';
 import { 
@@ -7,17 +7,15 @@ import {
   Save, FolderOpen, Copy, Mail 
 } from 'lucide-react';
 import { buildEmailHTML } from '../../utils/emailGenerator';
+import { useEditorStore } from '../../store/useEditorStore';
+import { useSettings } from '../../contexts/SettingsContext';
 
-interface BuilderProps {
-  blocks: Block[];
-  setBlocks: React.Dispatch<React.SetStateAction<Block[]>>;
-  settings: InstitutionSettings;
-}
-
-export default function Builder({ blocks, setBlocks, settings }: BuilderProps) {
+export default function Builder() {
+  const { blocks, setBlocks, addBlock, updateBlock, moveBlock, removeBlock } = useEditorStore();
+  const { settings } = useSettings();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const addBlock = (type: BlockType) => {
+  const handleAddBlock = (type: BlockType) => {
     const newBlock: Block = { id: Date.now().toString(), type };
     if (type === 'text') { newBlock.content = 'Escribe aquí...'; newBlock.align = 'left'; newBlock.bgImage = ''; newBlock.bgOpacity = 0.06; newBlock.bgSize = 'contain'; }
     if (type === 'box') { newBlock.content = 'DESTACADO'; newBlock.bgColor = '#e0f2fe'; newBlock.textColor = '#0c4a6e'; newBlock.align = 'center'; }
@@ -32,29 +30,7 @@ export default function Builder({ blocks, setBlocks, settings }: BuilderProps) {
       newBlock.line2 = settings.department;
       newBlock.logoWidth = 60;
     }
-    setBlocks([...blocks, newBlock]);
-  };
-
-  const updateBlock = (index: number, updates: Partial<Block>) => {
-    const newBlocks = [...blocks];
-    newBlocks[index] = { ...newBlocks[index], ...updates };
-    setBlocks(newBlocks);
-  };
-
-  const moveBlock = (index: number, direction: -1 | 1) => {
-    if ((direction === -1 && index > 0) || (direction === 1 && index < blocks.length - 1)) {
-      const newBlocks = [...blocks];
-      const temp = newBlocks[index];
-      newBlocks[index] = newBlocks[index + direction];
-      newBlocks[index + direction] = temp;
-      setBlocks(newBlocks);
-    }
-  };
-
-  const removeBlock = (index: number) => {
-    const newBlocks = [...blocks];
-    newBlocks.splice(index, 1);
-    setBlocks(newBlocks);
+    addBlock(newBlock);
   };
 
   const handleSaveJson = () => {
@@ -139,9 +115,6 @@ export default function Builder({ blocks, setBlocks, settings }: BuilderProps) {
               block={block} 
               index={i} 
               totalBlocks={blocks.length}
-              updateBlock={updateBlock}
-              moveBlock={moveBlock}
-              removeBlock={removeBlock}
             />
           ))}
         </div>
@@ -149,38 +122,38 @@ export default function Builder({ blocks, setBlocks, settings }: BuilderProps) {
         {/* Add Blocks Toolbar */}
         <div className="p-4 bg-white border-t border-slate-200">
           <div className="grid grid-cols-4 gap-3 mb-4">
-            <button onClick={() => addBlock('header_tri')} className="col-span-4 p-4 rounded-xl border border-slate-100 bg-slate-50 flex items-center justify-center gap-2 hover:border-blue-300 transition-colors">
+            <button onClick={() => handleAddBlock('header_tri')} className="col-span-4 p-4 rounded-xl border border-slate-100 bg-slate-50 flex items-center justify-center gap-2 hover:border-blue-300 transition-colors">
               <div className="w-8 h-8 rounded bg-white shadow-sm flex items-center justify-center text-blue-600">
                 <Box size={16} />
               </div>
               <span className="text-xs font-bold text-slate-600">Encabezado Oficial</span>
             </button>
             
-            <button onClick={() => addBlock('text')} className="p-3 rounded-xl border border-slate-100 bg-slate-50 flex flex-col items-center justify-center gap-2 hover:border-blue-300 transition-colors">
+            <button onClick={() => handleAddBlock('text')} className="p-3 rounded-xl border border-slate-100 bg-slate-50 flex flex-col items-center justify-center gap-2 hover:border-blue-300 transition-colors">
               <div className="w-8 h-8 rounded bg-white shadow-sm flex items-center justify-center text-blue-600"><Type size={16} /></div>
               <span className="text-[10px] font-medium text-slate-600">Texto</span>
             </button>
-            <button onClick={() => addBlock('columns')} className="p-3 rounded-xl border border-slate-100 bg-slate-50 flex flex-col items-center justify-center gap-2 hover:border-blue-300 transition-colors">
+            <button onClick={() => handleAddBlock('columns')} className="p-3 rounded-xl border border-slate-100 bg-slate-50 flex flex-col items-center justify-center gap-2 hover:border-blue-300 transition-colors">
               <div className="w-8 h-8 rounded bg-white shadow-sm flex items-center justify-center text-blue-600"><Columns size={16} /></div>
               <span className="text-[10px] font-medium text-slate-600">Fila 50/50</span>
             </button>
-            <button onClick={() => addBlock('image')} className="p-3 rounded-xl border border-slate-100 bg-slate-50 flex flex-col items-center justify-center gap-2 hover:border-blue-300 transition-colors">
+            <button onClick={() => handleAddBlock('image')} className="p-3 rounded-xl border border-slate-100 bg-slate-50 flex flex-col items-center justify-center gap-2 hover:border-blue-300 transition-colors">
               <div className="w-8 h-8 rounded bg-white shadow-sm flex items-center justify-center text-blue-600"><ImageIcon size={16} /></div>
               <span className="text-[10px] font-medium text-slate-600">Imagen</span>
             </button>
-            <button onClick={() => addBlock('box')} className="p-3 rounded-xl border border-slate-100 bg-slate-50 flex flex-col items-center justify-center gap-2 hover:border-blue-300 transition-colors">
+            <button onClick={() => handleAddBlock('box')} className="p-3 rounded-xl border border-slate-100 bg-slate-50 flex flex-col items-center justify-center gap-2 hover:border-blue-300 transition-colors">
               <div className="w-8 h-8 rounded bg-white shadow-sm flex items-center justify-center text-blue-600"><Square size={16} /></div>
               <span className="text-[10px] font-medium text-slate-600">Caja</span>
             </button>
-            <button onClick={() => addBlock('button')} className="p-3 rounded-xl border border-slate-100 bg-slate-50 flex flex-col items-center justify-center gap-2 hover:border-blue-300 transition-colors">
+            <button onClick={() => handleAddBlock('button')} className="p-3 rounded-xl border border-slate-100 bg-slate-50 flex flex-col items-center justify-center gap-2 hover:border-blue-300 transition-colors">
               <div className="w-8 h-8 rounded bg-white shadow-sm flex items-center justify-center text-blue-600"><Link size={16} /></div>
               <span className="text-[10px] font-medium text-slate-600">Botón</span>
             </button>
-            <button onClick={() => addBlock('separator')} className="p-3 rounded-xl border border-slate-100 bg-slate-50 flex flex-col items-center justify-center gap-2 hover:border-blue-300 transition-colors">
+            <button onClick={() => handleAddBlock('separator')} className="p-3 rounded-xl border border-slate-100 bg-slate-50 flex flex-col items-center justify-center gap-2 hover:border-blue-300 transition-colors">
               <div className="w-8 h-8 rounded bg-white shadow-sm flex items-center justify-center text-blue-600"><Minus size={16} /></div>
               <span className="text-[10px] font-medium text-slate-600">Línea</span>
             </button>
-            <button onClick={() => addBlock('html')} className="p-3 rounded-xl border border-slate-100 bg-slate-50 flex flex-col items-center justify-center gap-2 hover:border-blue-300 transition-colors">
+            <button onClick={() => handleAddBlock('html')} className="p-3 rounded-xl border border-slate-100 bg-slate-50 flex flex-col items-center justify-center gap-2 hover:border-blue-300 transition-colors">
               <div className="w-8 h-8 rounded bg-white shadow-sm flex items-center justify-center text-blue-600"><Code size={16} /></div>
               <span className="text-[10px] font-medium text-slate-600">HTML</span>
             </button>
@@ -198,7 +171,7 @@ export default function Builder({ blocks, setBlocks, settings }: BuilderProps) {
       </div>
 
       {/* Preview Area */}
-      <Preview blocks={blocks} settings={settings} />
+      <Preview />
     </div>
   );
 }

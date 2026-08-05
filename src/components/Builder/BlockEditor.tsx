@@ -1,17 +1,16 @@
 import React from 'react';
 import { Block } from '../../types';
 import { ChevronUp, ChevronDown, Trash2, Box, Image as ImageIcon, Type, Link, Minus, Code, Square, Columns } from 'lucide-react';
+import { useEditorStore } from '../../store/useEditorStore';
 
 interface BlockEditorProps {
   block: Block;
   index: number;
   totalBlocks: number;
-  updateBlock: (index: number, updates: Partial<Block>) => void;
-  moveBlock: (index: number, direction: -1 | 1) => void;
-  removeBlock: (index: number) => void;
 }
 
-export default function BlockEditor({ block, index, totalBlocks, updateBlock, moveBlock, removeBlock }: BlockEditorProps) {
+export default function BlockEditor({ block, index, totalBlocks }: BlockEditorProps) {
+  const { updateBlock, moveBlock, removeBlock } = useEditorStore();
   
   const handleUpdate = (key: keyof Block, value: any) => {
     updateBlock(index, { [key]: value });

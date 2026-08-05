@@ -1,13 +1,12 @@
-import React, { useRef } from 'react';
-import { Block, InstitutionSettings } from '../../types';
+import React from 'react';
 import { buildEmailHTML } from '../../utils/emailGenerator';
+import { useEditorStore } from '../../store/useEditorStore';
+import { useSettings } from '../../contexts/SettingsContext';
 
-interface PreviewProps {
-  blocks: Block[];
-  settings: InstitutionSettings;
-}
-
-export default function Preview({ blocks, settings }: PreviewProps) {
+export default function Preview() {
+  const { blocks } = useEditorStore();
+  const { settings } = useSettings();
+  
   const htmlContent = buildEmailHTML(blocks, settings);
   
   return (
